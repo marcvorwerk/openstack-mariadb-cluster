@@ -1,0 +1,7 @@
+---
+
+node_exporter:
+  version: v1.8.2
+
+cadvisor:
+  version: v0.47.2

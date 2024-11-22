@@ -1,0 +1,34 @@
+---
+- name: Create /etc/mariadb
+  ansible.builtin.file:
+    path: /etc/mariadb
+    state: directory
+    group: root
+    owner: root
+    mode: "0755"
+
+- name: Create /var/lib/mysql
+  ansible.builtin.file:
+    state: directory
+    path: /var/lib/mysql
+    owner: "999"
+    group: "999"
+    mode: "0750"
+
+- name: Stop galera_bootstrap if running
+  community.general.docker_container:
+    name: galera_bootstrap
+    state: absent
+
+- name: Pull MariaDB Docker image
+  community.docker.docker_image:
+    name: mariadb
+    tag: "{{ mariadb.version }}"
+    source: pull
+    pull:
+      platform: amd64
+
+- name: Add db_connect alias
+  ansible.builtin.lineinfile:
+    path: /etc/bash.bashrc
+    line: alias db_connect="sudo docker exec -ti galera mariadb -u root -p\$(sudo docker exec galera printenv MARIADB_ROOT_PASSWORD)"

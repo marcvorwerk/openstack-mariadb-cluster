@@ -1,0 +1,8 @@
+manage-db/dynamic_inventory
+
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+*.terraform.lock.hcl*
+
+.python-version

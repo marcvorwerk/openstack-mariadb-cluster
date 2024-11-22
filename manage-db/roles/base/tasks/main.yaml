@@ -1,0 +1,32 @@
+---
+- name: Start Node Exporter
+  community.general.docker_container:
+    name: node_exporter
+    image: quay.io/prometheus/node-exporter:{{ node_exporter.version }}
+    state: started
+    restart_policy: unless-stopped
+    volumes:
+      - /:/host:ro,rslave
+    command:
+      - "--path.rootfs=/host"
+    pid_mode: host
+    ports:
+      - "9100:9100"
+
+- name: Start cadvisor
+  community.general.docker_container:
+    name: cadvisor
+    image: gcr.io/cadvisor/cadvisor:{{ cadvisor.version }}
+    restart_policy: unless-stopped
+    privileged: true
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /dev/disk/:/dev/disk:ro
+      - /dev/kmsg:/dev/kmsg:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    command:
+      - --docker_only=true
+    ports:
+      - "8080:8080"

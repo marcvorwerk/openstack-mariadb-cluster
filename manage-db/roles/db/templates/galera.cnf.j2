@@ -1,0 +1,11 @@
+[mysqld]
+bind-address = 0.0.0.0
+binlog_format = ROW
+default_storage_engine=innodb
+innodb_autoinc_lock_mode = 2
+wsrep_on = ON
+wsrep_provider = /usr/lib/galera/libgalera_smm.so
+wsrep_node_address = {{ ansible_host }}
+wsrep_sst_method = rsync
+wsrep_cluster_name = {{ galera_cluster_name | default('testcluster') }}
+wsrep_cluster_address = gcomm://{% for node in groups['group_worker'] %}{{ hostvars[node]['ansible_host'] }}{% if not loop.last %},{% endif %}{% endfor %}

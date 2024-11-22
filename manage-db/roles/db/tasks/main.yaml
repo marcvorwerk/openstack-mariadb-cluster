@@ -1,0 +1,20 @@
+---
+- name: Import base tasks
+  ansible.builtin.import_tasks: base.yaml
+
+- name: Deploy galera.cnf file
+  ansible.builtin.template:
+    src: galera.cnf.j2
+    dest: /etc/mariadb/galera.cnf
+    owner: root
+    group: root
+    mode: 0644
+  # notify: restart galera
+
+- name: Import bootstrap tasks
+  ansible.builtin.import_tasks: bootstrap.yaml
+  when: bootstrap
+
+- name: Import run tasks
+  ansible.builtin.import_tasks: run.yaml
+  when: not bootstrap

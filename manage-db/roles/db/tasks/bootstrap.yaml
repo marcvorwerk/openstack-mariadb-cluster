@@ -1,0 +1,39 @@
+---
+- name: Check if already bootstraped
+  ansible.builtin.stat:
+    path: /var/lib/mariadb-galera-bootstrap.done
+  register: bootstrap_done
+
+- name: Perform Galera bootstrap
+  community.docker.docker_container:
+    name: galera_bootstrap
+    image: mariadb:{{ mariadb.version }}
+    restart_policy: "False"
+    env:
+      MARIADB_ROOT_PASSWORD: "{{ galera_root_password }}"
+      MARIADB_ALLOW_EMPTY_PASSWORD: "no"
+      MARIADB_INITDB_SKIP_TZINFO: "True"
+    volumes:
+      - /var/lib/mysql:/var/lib/mysql:rw
+      - /etc/mariadb:/etc/mysql/conf.d
+    network_mode: host
+    command: mariadbd --wsrep-new-cluster
+  run_once: true
+  when: not bootstrap_done.stat.exists
+
+- name: Wait
+  ansible.builtin.wait_for:
+    port: 3306
+    delay: 30
+    timeout: 180
+    host: "{{ ansible_host }}"
+  when: not bootstrap_done.stat.exists
+
+- name: Create bootstrap flag file
+  ansible.builtin.file:
+    path: /var/lib/mariadb-galera-bootstrap.done
+    state: touch
+    owner: root
+    group: root
+    mode: 0644
+  when: not bootstrap_done.stat.exists

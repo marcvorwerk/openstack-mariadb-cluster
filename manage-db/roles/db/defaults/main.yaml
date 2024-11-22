@@ -1,0 +1,6 @@
+---
+
+mariadb:
+  version: 11.5.2
+
+galera_root_password: ThisPa$$w0rdIsIn$ecure!

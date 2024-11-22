@@ -1,0 +1,35 @@
+---
+- name: Dynamically select first Manager as Jumphost
+  hosts: group_worker
+  become: true
+  gather_facts: false
+  vars:
+    jumphost_ip: "{{ hostvars[groups['group_jumphost'][0]].ansible_host }}"
+  pre_tasks:
+    - name: Confirm cluster delete
+      ansible.builtin.pause:
+        prompt: Are you sure? Enter to continue. CTRL-C to cancel
+  tasks:
+    - name: Set Jumphost
+      ansible.builtin.set_fact:
+        ansible_ssh_common_args: "-o ProxyCommand='ssh -W %h:%p -q ubuntu@{{ jumphost_ip }}'"
+
+    - name: Stop and remove galera_bootstrap container
+      community.docker.docker_container:
+        name: galera_bootstrap
+        state: absent
+
+    - name: Stop and remove galera container
+      community.docker.docker_container:
+        name: galera
+        state: absent
+
+    - name: Delete /var/lib/mysql directory
+      ansible.builtin.file:
+        path: /var/lib/mysql
+        state: absent
+
+    - name: Delete /var/lib/mariadb-galera-bootstrap.done file
+      ansible.builtin.file:
+        path: /var/lib/mariadb-galera-bootstrap.done
+        state: absent

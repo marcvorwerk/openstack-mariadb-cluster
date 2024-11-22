@@ -1,0 +1,39 @@
+---
+- name: Dynamically select first Manager as Jumphost
+  hosts: group_project_tf_mariadb
+  gather_facts: false
+  vars:
+    jumphost_ip: "{{ hostvars[groups['group_jumphost'][0]].ansible_host }}"
+  tasks:
+    - name: Set Jumphost
+      ansible.builtin.set_fact:
+        ansible_ssh_common_args: "-o ProxyCommand='ssh -W %h:%p -q ubuntu@{{ jumphost_ip }}'"
+
+- name: Rollout base stuff to all nodes
+  hosts:
+    - group_project_tf_mariadb
+  become: true
+  serial: 2
+  roles:
+    - base
+
+- name: Bootstrap cluster on the first node
+  hosts:
+    - group_worker[0]
+  become: true
+  serial: 1
+  vars:
+    bootstrap: true
+  roles:
+    - db
+
+- name: Manage cluster
+  hosts:
+    - group_worker
+  order: reverse_inventory
+  become: true
+  serial: 1
+  vars:
+    bootstrap: false
+  roles:
+    - db

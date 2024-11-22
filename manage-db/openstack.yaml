@@ -1,0 +1,24 @@
+---
+
+plugin: openstack.cloud.openstack
+
+all_projects: false
+expand_hostvars: true
+fail_on_errors: true
+strict: true
+
+keyed_groups:
+  - key: openstack.tags
+    prefix: group
+
+groups:
+  tg: "'test' in (openstack.tags|list)"
+  test: "'env=test' in (openstack.tags|list)"
+  jumphosts: "'jumphost' in (openstack.tags|list)"
+  #production: "'env=production' in (openstack.tags|list)"
+
+cache: no
+cache_plugin: ansible.builtin.jsonfile
+cache_timeout: 3600
+cache_connection: dynamic_inventory
+cache_prefix: os_
