@@ -42,5 +42,5 @@ ansible-playbook -i openstack.yaml manage.yaml -D
 
 ## Disclaimer
 
-[!CAUTION]
-This example is meant for educational purposes only. For a robust and secure deployment, additional configurations and hardening are necessary.
+> [!CAUTION]
+> This example is meant for educational purposes only. For a robust and secure deployment, additional configurations and hardening are necessary.
